@@ -7,4 +7,4 @@ install-bb:
 install: install-bb install-wkhtmltopdf
 
 start:
-	CLOUDINARY_URL=$(cl-url) bb main.clj $(token)
+	CLOUDINARY_URL=$(cl-url) ./bb main.clj $(token)

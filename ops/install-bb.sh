@@ -4,9 +4,10 @@ case "$(uname -s)" in
     Darwin*)    platform=macos;;
 esac
 
-curl -L "https://github.com/borkdude/babashka/releases/download/v0.0.91/babashka-0.0.91-$platform-amd64.zip" -o /tmp/bb.zip
-unzip -qqo /tmp/bb.zip
-rm /tmp/bb.zip
-mv /tmp/bb /usr/local/bin/
+curl -L "https://github.com/borkdude/babashka/releases/download/v0.0.91/babashka-0.0.91-$platform-amd64.zip" -o bb.zip
+unzip -qqo bb.zip
+rm bb.zip
+ls
+chmod +x ./bb
 
-bb --version
+./bb --version
