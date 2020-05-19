@@ -26,4 +26,4 @@ jobs:
         run: make install
       
       - name: Create and upload invoices
-        run: make start cl-url={{ secrets.CL_URL }} token={{ secrets.AIRTABLE_TOKEN }}
+        run: make start cl-url=${{ secrets.CL_URL }} token=${{ secrets.AIRTABLE_TOKEN }}
