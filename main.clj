@@ -78,7 +78,7 @@
 
     (println "Update airtable to include receipts uploaded to Cloudinary")
     (try
-      (curl/patch "https://api.airtable.com/v0/appx6DLouO74VEgkD/Donations"
+      (curl/patch "https://api.airtable.com/v0/appx6DLouO74VEgkD/Receipts"
                   {:headers {"Authorization" (str "Bearer " token)
                              "Content-Type" "application/json"}
                    :body body})
