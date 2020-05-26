@@ -32,7 +32,7 @@
 (defn get-pending-donations
   "Fetch all donations for which an invoice needs to be generated"
   [token]
-  (-> (curl/get "https://api.airtable.com/v0/appx6DLouO74VEgkD/Donations?maxRecords=100&view=ready-for-generating-receipt"
+  (-> (curl/get "https://api.airtable.com/v0/appx6DLouO74VEgkD/Receipts?maxRecords=100&view=ready-for-generating-receipt"
                 {:headers {"Authorization" (str "Bearer " token)}})
       :body
       json/decode))
