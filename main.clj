@@ -17,7 +17,7 @@
 
 (defn gen-pdf [id params]
   (let [uri (str invoice-url "?" (params->query-string params))]
-    (shell/sh "wkhtmltopdf" uri (str "./pdfs/" id ".pdf") "--image-dpi" "300")))
+    (shell/sh "wkhtmltopdf" "--image-dpi" "300" uri (str "./pdfs/" id ".pdf"))))
 
 (defn get-user-details [token user-ids]
   (let [fields ["Name" "Phone" "Address" "Email"]
