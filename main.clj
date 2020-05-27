@@ -38,7 +38,7 @@
       json/decode))
 
 (defn record->from-id [r]
-  (first (get-in r ["fields" "From"])))
+  (first (get-in r ["fields" "From Person"])))
 
 (defn user-by-id [users-res id]
   (->> (get users-res "records" [])
@@ -49,7 +49,7 @@
   "Convert donation and user data to a map that can be send to gen-pdf function"
   [donations-res users-res]
   (map (fn [donation]
-         (let [user (user-by-id users-res (-> donation (get-in ["fields" "From"]) first))]
+         (let [user (user-by-id users-res (record->from-id donation))]
            [(get-in donation ["id"])
             {"amount" (str "Rs. " (get-in donation ["fields" "Amount"]) "/-")
              "date" (get-in donation ["fields" "Date"])
@@ -86,7 +86,7 @@
       (catch Exception e
           (println e)))
 
-    (println "Delete the receipts on cloudinary")
+    ;; (println "Delete the receipts on cloudinary")
     ;; (shell/sh "cld" "admin" "delete_resources" "all" "true")
     ))
 
@@ -102,6 +102,16 @@
           (upload-receipts token donations-res))
       (println "No new records"))
     ))
+
+(comment
+  (-> ".airtable-token"
+      slurp
+      get-pending-donations
+      (get "records" [])
+      (->> (map record->from-id)
+           (get-user-details (slurp ".airtable-token")))
+      )
+  )
 
 (when *command-line-args*
   (let [[token] *command-line-args*]
