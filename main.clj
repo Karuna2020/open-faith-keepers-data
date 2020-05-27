@@ -67,7 +67,7 @@
               (assoc donation
                      "fields"
                      {"Status" "Receipt generated"
-                      "Receipt" [{:url (str "https://res.cloudinary.com/muskaangc/image/upload/v1589871654/receipts/pdfs/" (get donation "id") ".pdf")
+                      "Receipt" [{:url (str "https://res.cloudinary.com/muskaangc/image/upload/v1589871654/receipts-backup/pdfs/" (get donation "id") ".pdf")
                                   :filename (str (get donation "id") ".pdf")}]})))
        (map #(dissoc % "createdTime"))))
 
@@ -75,7 +75,7 @@
   (let [body (json/encode
               {:records (donations-res->patch-res donations-res)})]
     (println "Upload receipts to Cloudinary")
-    (shell/sh "cld" "upload_dir" "-f" "receipts" "-o" "overwrite" "true" "pdfs")
+    (shell/sh "cld" "upload_dir" "-f" "receipts-backup" "-o" "overwrite" "true" "pdfs")
 
     (println "Update airtable to include receipts uploaded to Cloudinary")
     (try
