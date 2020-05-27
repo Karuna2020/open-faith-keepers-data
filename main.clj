@@ -17,14 +17,15 @@
 
 (defn gen-pdf [id params]
   (let [uri (str invoice-url "?" (params->query-string params))]
-    (shell/sh "wkhtmltopdf" uri (str "./pdfs/" id ".pdf"))))
+    (shell/sh "wkhtmltopdf" uri (str "./pdfs/" id ".pdf") "--image-dpi" "300")))
 
 (defn get-user-details [token user-ids]
   (let [fields ["Name" "Phone" "Address" "Email"]
         fields-qs (clojure.string/join "&" (map #(str "fields[]=" %) fields))
         ;; formula docs: https://community.airtable.com/t/return-multiple-records-for-linked-table/5954/5
-        formula-qs (str "filterByFormula=OR(" (clojure.string/join "," (map #(str "RECORD_ID()='" % "'") user-ids)) ")")]
-    (-> (curl/get (str "https://api.airtable.com/v0/appx6DLouO74VEgkD/People?maxRecords=3&view=Grid" "&" formula-qs "&" fields-qs)
+        formula-qs (str "filterByFormula=OR(" (clojure.string/join "," (map #(str "RECORD_ID()='" % "'") user-ids)) ")")
+        uri (str "https://api.airtable.com/v0/appx6DLouO74VEgkD/People?maxRecords=100&view=Grid" "&" formula-qs "&" fields-qs)]
+    (-> (curl/get uri
                   {:headers {"Authorization" (str "Bearer " token)}})
         :body
         json/decode)))
@@ -104,6 +105,12 @@
     ))
 
 (comment
+  (let [token (slurp ".airtable-token")
+        donations-res (get-pending-donations token)
+        from-user-ids (map record->from-id (get donations-res "records" []))
+        users-res (get-user-details token from-user-ids)]
+    (donations->pdf-params donations-res users-res)
+    )
   (-> ".airtable-token"
       slurp
       get-pending-donations
