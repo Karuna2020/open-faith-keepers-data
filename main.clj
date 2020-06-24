@@ -7,6 +7,13 @@
 
 (def invoice-url "https://muskaan-fkp-invoice.glitch.me")
 
+(defn template->html [path vars]
+  (let [m (atom (slurp path))]
+    (doseq [[k v] vars]
+      (reset! m (clojure.string/replace @m (re-pattern (str k)) (str v))))
+    @m))
+
+
 (defn params->query-string [m]
   (clojure.string/join "&"
                        (for [[k v] m]
@@ -16,8 +23,9 @@
   (shell/sh "bash" "-c" command))
 
 (defn gen-pdf [id params]
-  (let [uri (str invoice-url "?" (params->query-string params))]
-    (shell/sh "wkhtmltopdf" "--image-dpi" "300" uri (str "./pdfs/" id ".pdf"))))
+  (let [html (template->html "invoice.html.template" params)
+        _ (spit (str "./pdfs/" id ".html") html)]
+    (bash (str "cat ./pdfs/" id ".html | wkhtmltopdf --image-dpi 300  - ./pdfs/" id ".pdf"))))
 
 (defn get-user-details [token user-ids]
   (let [fields ["Name" "Phone" "Address" "Email"]
@@ -52,13 +60,14 @@
   (map (fn [donation]
          (let [user (user-by-id users-res (record->from-id donation))]
            [(get-in donation ["id"])
-            {"amount" (str "Rs. " (get-in donation ["fields" "Amount"]) "/-")
-             "date" (get-in donation ["fields" "Date"])
-             "txId" (get-in donation ["fields" "Transaction Id"] "")
-             "name" (get-in user ["fields" "Name"])
-             "address" (get-in user ["fields" "Address"])
-             "email" (get-in user ["fields" "Email"])
-             "invoiceNumber" (get-in donation ["fields" "id"])}]))
+            {:amount (str "Rs. " (get-in donation ["fields" "Amount"]) "/-")
+             :date (get-in donation ["fields" "Date"])
+             :txId (get-in donation ["fields" "Transaction Id"] "")
+             :name (get-in user ["fields" "Name"])
+             :address (get-in user ["fields" "Address"])
+             :email (get-in user ["fields" "Email"])
+             :phone (get-in user ["fields" "Phone"])
+             :invoiceNumber (get-in donation ["fields" "id"])}]))
        (get donations-res "records" [])))
 
 (defn donations-res->patch-res [donations-res]
@@ -72,24 +81,26 @@
        (map #(dissoc % "createdTime"))))
 
 (defn upload-receipts [token donations-res]
-  (let [body (json/encode
-              {:records (donations-res->patch-res donations-res)})]
-    (println "Upload receipts to Cloudinary")
-    (shell/sh "cld" "upload_dir" "-f" "receipts-backup" "-o" "overwrite" "true" "pdfs")
+  (let [updates (partition-all 8 (donations-res->patch-res donations-res))]
+    (doseq [records updates]
+      (let [body (json/encode
+                  {:records records})]
+        (println "Upload receipts to Cloudinary")
+        (shell/sh "cld" "upload_dir" "-f" "receipts-backup" "-o" "overwrite" "true" "pdfs")
 
-    (println "Update airtable to include receipts uploaded to Cloudinary")
-    (try
-      (curl/patch "https://api.airtable.com/v0/appx6DLouO74VEgkD/Receipts"
-                  {:headers {"Authorization" (str "Bearer " token)
-                             "Content-Type" "application/json"}
-                   :body body})
+        (println "Update airtable to include receipts uploaded to Cloudinary")
+        (try
+          (curl/patch "https://api.airtable.com/v0/appx6DLouO74VEgkD/Receipts"
+                      {:headers {"Authorization" (str "Bearer " token)
+                                 "Content-Type" "application/json"}
+                       :body body})
 
-      (catch Exception e
-          (println e)))
+          (catch Exception e
+            (println e)))
 
-    ;; (println "Delete the receipts on cloudinary")
-    ;; (shell/sh "cld" "admin" "delete_resources" "all" "true")
-    ))
+        ;; (println "Delete the receipts on cloudinary")
+        ;; (shell/sh "cld" "admin" "delete_resources" "all" "true")
+        ))))
 
 (defn main [token]
   (let [donations-res (get-pending-donations token)
@@ -100,7 +111,8 @@
           (doall (pmap #(apply gen-pdf %) (donations->pdf-params donations-res users-res)))
 
           (println "Uploading receipts")
-          (upload-receipts token donations-res))
+          (upload-receipts token donations-res)
+          :done)
       (println "No new records"))
     ))
 
@@ -109,8 +121,12 @@
         donations-res (get-pending-donations token)
         from-user-ids (map record->from-id (get donations-res "records" []))
         users-res (get-user-details token from-user-ids)]
-    (donations->pdf-params donations-res users-res)
+    (donations-res->patch-res donations-res)
+    ;;(donations->pdf-params donations-res users-res)
     )
+
+  (partition-all 10 (range 28))
+  (main (slurp ".airtable-token"))
   (-> ".airtable-token"
       slurp
       get-pending-donations

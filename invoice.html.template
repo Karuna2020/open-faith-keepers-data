@@ -1,0 +1,94 @@
+<!-- This is a static file -->
+<!-- served from your routes in server.js -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A cool thing made with Glitch" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"
+    />
+  </head>
+  <body class="black-80 sans-serif pa4">
+    <div class="flex flex-column">
+      <div class="flex justify-between">
+        <div>
+          <img
+            class="h4"
+            src="https://cdn.glitch.com/a7651d3d-26d4-49b8-b4cb-0f0bacf1da9f%2Fvibha-space.png?v=1589811478673"
+          />
+        </div>
+        <div class="purple mt3 o-80 w-40">
+          602, Tower 8, Unitech Horizon Sector Pi-2, Greater Noida G B
+          Nagar-201309, UP, India
+        </div>
+      </div>
+
+      <div class="f2 b mt3">
+        Receipt #:invoiceNumber
+      </div>
+
+      <div class="mt1">
+        Your donation was received in Muskaan's bank account, as per the details given below:
+      </div>
+
+      <div class="mt4 w-100">
+        <table class="w-100">
+          <tbody class="w-100">
+            <tr class="striped--light-gray w-100">
+              <td class="w-20 pa1 b">Name</td>
+              <td class="w-40 pa1">:name</td>
+            </tr>
+
+            <tr class=" w-100">
+              <td class="w-20 pa1 b">Amount (INR)</td>
+              <td class="w-40 pa1">:amount</td>
+            </tr>
+
+            <tr class="striped--light-gray w-100">
+              <td class="w-20 pa1 b">Date</td>
+              <td class="w-40 pa1">:date</td>
+            </tr>
+
+            <tr class="w-100">
+              <td class="w-20 pa1 b">Phone</td>
+              <td class="w-40 pa1">:phone</td>
+            </tr>
+
+            <tr class="striped--light-gray w-100">
+              <td class="w-20 pa1 b">Email</td>
+              <td class="w-40 pa1">:email</td>
+            </tr>
+
+            <tr class="striped--light-gray w-100">
+              <td class="w-20 pa1 b">Address</td>
+              <td class="w-40 pa1">:address</td>
+            </tr>
+
+            <tr class="striped--light-gray w-100">
+              <td class="w-20 pa1 b">Transaction Id</td>
+              <td class="w-40 pa1">:txId</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt5">
+        <div class="b">Thank you</div>
+        <div class="mt2">
+          Jasnoor Marwah
+        </div>
+	Project Coordinator, Muskaan
+        <div class="mt3 black-60">
+          Contact: muskaan@vibhaspace.net
+        </div>
+        <div class="mt3 code bg-black-10 pa2 br3 f7 black-70 i">
+          This is a computer generated invoice and doesn't need a signature.
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

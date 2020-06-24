@@ -1,4 +1,5 @@
 pdfs/*.pdf
+pdfs/*.html
 .#*
 .airtable-token
 .cl-secret
